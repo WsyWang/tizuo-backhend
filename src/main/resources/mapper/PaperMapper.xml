@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wsy.tizuobackend.mapper.PaperMapper">
+
+    <resultMap id="BaseResultMap" type="com.wsy.tizuobackend.model.entity.Paper">
+            <id property="paperId" column="paperId" jdbcType="BIGINT"/>
+            <result property="questionIdList" column="questionIdList" jdbcType="VARCHAR"/>
+            <result property="scoreInfo" column="scoreInfo" jdbcType="VARCHAR"/>
+            <result property="totalScore" column="totalScore" jdbcType="VARCHAR"/>
+            <result property="teacherId" column="teacherId" jdbcType="BIGINT"/>
+            <result property="subName" column="subName" jdbcType="VARCHAR"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        paperId,questionIdList,scoreInfo,
+        totalScore,teacherId,subName,
+        isDelete,createTime,updateTime
+    </sql>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wsy.tizuobackend.mapper.ExamMapper">
+
+    <resultMap id="BaseResultMap" type="com.wsy.tizuobackend.model.entity.Exam">
+            <id property="examId" column="examId" jdbcType="BIGINT"/>
+            <result property="examName" column="examName" jdbcType="VARCHAR"/>
+            <result property="examStartTime" column="examStartTime" jdbcType="VARCHAR"/>
+            <result property="examEndTime" column="examEndTime" jdbcType="VARCHAR"/>
+            <result property="subName" column="subName" jdbcType="VARCHAR"/>
+            <result property="classid" column="classid" jdbcType="BIGINT"/>
+            <result property="examDurationTime" column="examDurationTime" jdbcType="VARCHAR"/>
+            <result property="paperId" column="paperId" jdbcType="BIGINT"/>
+            <result property="teacherId" column="teacherId" jdbcType="BIGINT"/>
+            <result property="examStatus" column="examStatus" jdbcType="TINYINT"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        examId,examName,examStartTime,
+        examEndTime,subName,classid,
+        examDurationTime,paperId,teacherId,
+        examStatus,isDelete,createTime,
+        updateTime
+    </sql>
+</mapper>
