@@ -65,15 +65,15 @@ public class PaperSubmitController {
         return RequestUtil.success(result);
     }
 
-    @PostMapping("/judgePaper")
-    @AuthCheck(mustRole = {UserConstant.TYPE_TEACHER})
-    public BaseResponse<Boolean> judgePaper(@RequestBody JudgePaperRequest judgePaperRequest, HttpServletRequest request) {
-        System.out.println(submitPaperRequest);
-        //判空
-        ThrowUtil.throwIf(ObjUtil.hasEmpty(submitPaperRequest, request), ErrorCode.PARAMS_ERROR, "请求参数为空");
-        //调用service方法
-        Boolean result = papersubmitService.judgePaper(submitPaperRequest, request);
-        //返回是否提交成功
-        return RequestUtil.success(result);
-    }
+    //@PostMapping("/judgePaper")
+    //@AuthCheck(mustRole = {UserConstant.TYPE_TEACHER})
+    //public BaseResponse<Boolean> judgePaper(@RequestBody JudgePaperRequest judgePaperRequest, HttpServletRequest request) {
+    //    System.out.println(submitPaperRequest);
+    //    //判空
+    //    ThrowUtil.throwIf(ObjUtil.hasEmpty(submitPaperRequest, request), ErrorCode.PARAMS_ERROR, "请求参数为空");
+    //    //调用service方法
+    //    Boolean result = papersubmitService.judgePaper(submitPaperRequest, request);
+    //    //返回是否提交成功
+    //    return RequestUtil.success(result);
+    //}
 }

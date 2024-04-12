@@ -1,6 +1,7 @@
 package com.wsy.tizuobackend.controller;
 
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wsy.tizuobackend.annotation.AuthCheck;
 import com.wsy.tizuobackend.common.BaseResponse;
 import com.wsy.tizuobackend.common.ErrorCode;
@@ -8,10 +9,8 @@ import com.wsy.tizuobackend.common.RequestUtil;
 import com.wsy.tizuobackend.constant.UserConstant;
 import com.wsy.tizuobackend.exception.ThrowUtil;
 import com.wsy.tizuobackend.model.dto.exam.ExamCreateRequest;
-import com.wsy.tizuobackend.model.vo.ExamDetailVO;
-import com.wsy.tizuobackend.model.vo.ExamInfoVO;
-import com.wsy.tizuobackend.model.vo.MyExamVO;
-import com.wsy.tizuobackend.model.vo.StartExamVO;
+import com.wsy.tizuobackend.model.dto.exam.GetExamListRequest;
+import com.wsy.tizuobackend.model.vo.*;
 import com.wsy.tizuobackend.service.ExamService;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,5 +89,20 @@ public class ExamController {
         ThrowUtil.throwIf(ObjUtil.isEmpty(examId), ErrorCode.PARAMS_ERROR);
         List<Long> questionIdList = examService.getQuestionIdList(examId);
         return RequestUtil.success(questionIdList);
+    }
+
+    /**
+     * 教师获取考试列表接口
+     * @param getExamListRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/get-examList-teacher")
+    @AuthCheck(mustRole = UserConstant.TYPE_TEACHER)
+    public BaseResponse<Page<ExamListVO>> getExamListTeacher(@RequestBody GetExamListRequest getExamListRequest, HttpServletRequest request) {
+        ThrowUtil.throwIf(getExamListRequest == null, ErrorCode.PARAMS_ERROR, "查询参数错误");
+        ThrowUtil.throwIf(request == null, ErrorCode.PARAMS_ERROR, "请求头错误");
+        Page<ExamListVO> examListVOPage = examService.getExamListTeacher(getExamListRequest, request);
+        return RequestUtil.success(examListVOPage);
     }
 }

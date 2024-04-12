@@ -1,44 +1,42 @@
 package com.wsy.tizuobackend.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.wsy.tizuobackend.common.ErrorCode;
 import com.wsy.tizuobackend.constant.ExamConstant;
 import com.wsy.tizuobackend.exception.ThrowUtil;
+import com.wsy.tizuobackend.mapper.ExamMapper;
 import com.wsy.tizuobackend.model.dto.exam.ExamCreateRequest;
+import com.wsy.tizuobackend.model.dto.exam.GetExamListRequest;
 import com.wsy.tizuobackend.model.entity.Cls;
 import com.wsy.tizuobackend.model.entity.Exam;
 import com.wsy.tizuobackend.model.vo.*;
 import com.wsy.tizuobackend.service.*;
-import com.wsy.tizuobackend.mapper.ExamMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.ref.PhantomReference;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
-* @author 15790
-* @description 针对表【tb_exam(考试信息表)】的数据库操作Service实现
-* @createDate 2024-03-24 12:00:31
-*/
+ * @author 15790
+ * @description 针对表【tb_exam(考试信息表)】的数据库操作Service实现
+ * @createDate 2024-03-24 12:00:31
+ */
 @Service
 public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
-    implements ExamService{
+        implements ExamService {
 
 
     @Resource
@@ -58,6 +56,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
     /**
      * 创建考试方法
+     *
      * @param examCreateRequest
      * @param request
      */
@@ -94,6 +93,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
     /**
      * 获取我的考试
+     *
      * @param request
      * @return
      */
@@ -135,6 +135,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
     /**
      * 获取考试详情
+     *
      * @param examId
      * @return
      */
@@ -173,6 +174,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
     /**
      * 开始考试
+     *
      * @param examId
      * @param request
      * @return
@@ -196,6 +198,7 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
 
     /**
      * 获取做题界面考试信息
+     *
      * @param examId
      * @return
      */
@@ -212,6 +215,48 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
         List<Long> questionIdList = paperService.getQuestionIdList(paperId);
         return questionIdList;
     }
+
+    /**
+     * 教师获取考试列表接口
+     *
+     * @param getExamListRequest
+     * @param request
+     * @return
+     */
+    @Override
+    public Page<ExamListVO> getExamListTeacher(GetExamListRequest getExamListRequest, HttpServletRequest request) {
+        //  a. 获取所有传输字段，判断当前页传递是否为空
+        String examName = getExamListRequest.getExamName();
+        String subName = getExamListRequest.getSubName();
+        long currentPage = getExamListRequest.getCurrentPage();
+        long pageSize = getExamListRequest.getPageSize();
+        ThrowUtil.throwIf(currentPage <= 0, ErrorCode.PARAMS_ERROR, "未填写当前页");
+        //  b. 获取当前用户id（教师id）
+        long teacherId = userService.getLoginUser(request).getId();
+        //  c. 构建查询条件：不为空的都是查询条件
+        QueryWrapper<Exam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(StrUtil.isNotEmpty(examName), "examName", examName);
+        queryWrapper.eq(StrUtil.isNotEmpty(subName), "subName", subName);
+        //  d. 构建分页，分页查询
+        Page<Exam> examListPage = this.page(new Page<>(currentPage, pageSize), queryWrapper);
+        //  e. 如果record大小为空，直接返回空分页对象
+        if (examListPage.getRecords().size() == 0) {
+            return new Page<>(currentPage, pageSize);
+        }
+        //  f. 取出record，stream流进行班级名查询、VO转换
+        List<ExamListVO> examListVOS = examListPage.getRecords().stream()
+                .map(exam -> {
+                    String className = clsService.getById(exam.getClassid()).getClassName();
+                    return ExamListVO.objToVO(exam, className);
+                }).collect(Collectors.toList());
+        //  g. 构建新分页，设置新的record
+        Page<ExamListVO> examListVOPage = new Page<>(currentPage, pageSize, examListPage.getTotal());
+        examListVOPage.setRecords(examListVOS);
+        //  h. 返回数据
+        return examListVOPage;
+    }
+
+
 }
 
 

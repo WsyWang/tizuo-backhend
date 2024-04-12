@@ -8,17 +8,16 @@ import com.wsy.tizuobackend.common.ErrorCode;
 import com.wsy.tizuobackend.common.RequestUtil;
 import com.wsy.tizuobackend.constant.UserConstant;
 import com.wsy.tizuobackend.exception.ThrowUtil;
-import com.wsy.tizuobackend.model.dto.cls.ClsQueryRequest;
 import com.wsy.tizuobackend.model.dto.paper.PaperCreateRequest;
+import com.wsy.tizuobackend.model.dto.paper.PaperListNoPageRequest;
 import com.wsy.tizuobackend.model.dto.paper.PaperQueryRequest;
-import com.wsy.tizuobackend.model.vo.ClsVO;
 import com.wsy.tizuobackend.model.vo.PaperVO;
-import com.wsy.tizuobackend.model.vo.QuestionVO;
 import com.wsy.tizuobackend.service.PaperService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 试卷接口
@@ -57,5 +56,13 @@ public class PaperController {
         Page<PaperVO> paperVOPage = paperService.getPaperList(request, queryRequest);
         return RequestUtil.success(paperVOPage);
     }
+
+    @PostMapping("/get_paper_list_no_page")
+    @AuthCheck(mustRole = {UserConstant.TYPE_TEACHER})
+    public BaseResponse<List<PaperVO>> getPaperListNoPage(@RequestBody PaperListNoPageRequest paperListNoPageRequest) {
+        List<PaperVO> paperVOList = paperService.getPaperListNoPage(paperListNoPageRequest);
+        return RequestUtil.success(paperVOList);
+    }
+
 
 }

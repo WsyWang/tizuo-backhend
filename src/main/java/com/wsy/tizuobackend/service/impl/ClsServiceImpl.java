@@ -169,6 +169,7 @@ public class ClsServiceImpl extends ServiceImpl<ClsMapper, Cls>
         QueryWrapper<Cls> clsQueryWrapper = new QueryWrapper<>();
         clsQueryWrapper.eq(StrUtil.isNotEmpty(subName), "subName", subName);
         clsQueryWrapper.eq(StrUtil.isNotEmpty(className), "className", className);
+        clsQueryWrapper.orderByDesc("updateTime");
         //分页查询
         Page<Cls> clsPage = this.page(new Page<>(currentPage, PageConstant.PAGE_SIZE), clsQueryWrapper);
         if (clsPage.getRecords().size() < 1) {
@@ -201,6 +202,7 @@ public class ClsServiceImpl extends ServiceImpl<ClsMapper, Cls>
         clsQueryWrapper.eq("teacherId", teacherId);
         clsQueryWrapper.eq(StrUtil.isNotEmpty(subName), "subName", subName);
         clsQueryWrapper.eq(StrUtil.isNotEmpty(className), "className", className);
+        clsQueryWrapper.orderByDesc("updateTime");
         //分页查询
         Page<Cls> clsPage = this.page(new Page<>(currentPage, PageConstant.PAGE_SIZE), clsQueryWrapper);
         if (clsPage.getRecords().size() < 1) {

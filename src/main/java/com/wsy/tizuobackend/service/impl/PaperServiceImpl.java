@@ -10,6 +10,7 @@ import com.wsy.tizuobackend.common.ErrorCode;
 import com.wsy.tizuobackend.constant.PageConstant;
 import com.wsy.tizuobackend.exception.ThrowUtil;
 import com.wsy.tizuobackend.model.dto.paper.PaperCreateRequest;
+import com.wsy.tizuobackend.model.dto.paper.PaperListNoPageRequest;
 import com.wsy.tizuobackend.model.dto.paper.PaperQueryRequest;
 import com.wsy.tizuobackend.model.entity.Paper;
 import com.wsy.tizuobackend.model.vo.PaperVO;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,6 +107,34 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper>
         Page<PaperVO> paperVOPage = new Page<>(currentPage, PageConstant.PAGE_SIZE, page.getTotal());
         paperVOPage.setRecords(paperVOS);
         return paperVOPage;
+    }
+
+    /**
+     * 获取试卷列表（不分页）
+     * @param paperListNoPageRequest
+     * @return
+     */
+    @Override
+    public List<PaperVO> getPaperListNoPage(PaperListNoPageRequest paperListNoPageRequest) {
+        //1. 传递参数：
+        //  a. 教师id，可选参数
+        //  b. 学科名，根据当前选择的学科
+        Long teacherId = paperListNoPageRequest.getTeacherId();
+        String subName = paperListNoPageRequest.getSubName();
+        //2. 参数校验
+        ThrowUtil.throwIf(StrUtil.isEmpty(subName), ErrorCode.PARAMS_ERROR, "学科科目为空");
+        //3. 构建查询条件
+        QueryWrapper<Paper> paperQueryWrapper = new QueryWrapper<>();
+        paperQueryWrapper.eq(teacherId > 0, "teacherId", teacherId);
+        paperQueryWrapper.eq("subName", subName);
+        List<Paper> list = this.list(paperQueryWrapper);
+        if (list.size() == 0) {
+            return new ArrayList<>();
+        }
+        //4. 查询后使用Stream流进行VO转换
+        List<PaperVO> paperVOList = list.stream().map(PaperVO::objToVO).collect(Collectors.toList());
+        //5. 返回转换后的List
+        return paperVOList;
     }
 
 }

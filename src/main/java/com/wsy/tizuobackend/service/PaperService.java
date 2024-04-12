@@ -2,6 +2,7 @@ package com.wsy.tizuobackend.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wsy.tizuobackend.model.dto.paper.PaperCreateRequest;
+import com.wsy.tizuobackend.model.dto.paper.PaperListNoPageRequest;
 import com.wsy.tizuobackend.model.dto.paper.PaperQueryRequest;
 import com.wsy.tizuobackend.model.entity.Paper;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -37,4 +38,11 @@ public interface PaperService extends IService<Paper> {
      * @return
      */
     Page<PaperVO> getPaperList(HttpServletRequest request, PaperQueryRequest queryRequest);
+
+    /**
+     * 获取试卷列表（不分页）
+     * @param paperListNoPageRequest
+     * @return
+     */
+    List<PaperVO> getPaperListNoPage(PaperListNoPageRequest paperListNoPageRequest);
 }
