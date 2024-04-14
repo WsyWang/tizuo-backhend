@@ -10,6 +10,7 @@ import com.wsy.tizuobackend.constant.UserConstant;
 import com.wsy.tizuobackend.exception.ThrowUtil;
 import com.wsy.tizuobackend.model.dto.exam.ExamCreateRequest;
 import com.wsy.tizuobackend.model.dto.exam.GetExamListRequest;
+import com.wsy.tizuobackend.model.dto.exam.ListExamCreateRequest;
 import com.wsy.tizuobackend.model.vo.*;
 import com.wsy.tizuobackend.service.ExamService;
 import org.springframework.web.bind.annotation.*;
@@ -105,4 +106,32 @@ public class ExamController {
         Page<ExamListVO> examListVOPage = examService.getExamListTeacher(getExamListRequest, request);
         return RequestUtil.success(examListVOPage);
     }
+
+    /**
+     * 管理员获取考试列表接口
+     * @param getExamListRequest
+     * @return
+     */
+    @PostMapping("/get-examList-admin")
+    @AuthCheck(mustRole = UserConstant.TYPE_ADMIN)
+    public BaseResponse<Page<ExamListVO>> getExamListAdmin(@RequestBody GetExamListRequest getExamListRequest) {
+        ThrowUtil.throwIf(getExamListRequest == null, ErrorCode.PARAMS_ERROR, "查询参数错误");
+        Page<ExamListVO> examListVOPage = examService.getExamListAdmin(getExamListRequest);
+        return RequestUtil.success(examListVOPage);
+    }
+
+    /**
+     * 创建考试列表
+     * @param listExamCreateRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("teacher/create/exam/by-list")
+    @AuthCheck(mustRole = {UserConstant.TYPE_TEACHER})
+    public BaseResponse<Boolean> teacherCreateExamByList(@RequestBody ListExamCreateRequest listExamCreateRequest, HttpServletRequest request) {
+        ThrowUtil.throwIf(ObjUtil.hasEmpty(listExamCreateRequest, request), ErrorCode.PARAMS_ERROR);
+        examService.teacherCreateExamByList(listExamCreateRequest, request);
+        return RequestUtil.success(true);
+    }
+
 }

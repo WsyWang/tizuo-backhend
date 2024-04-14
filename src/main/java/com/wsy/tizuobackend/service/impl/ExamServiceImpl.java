@@ -1,8 +1,10 @@
 package com.wsy.tizuobackend.service.impl;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -16,6 +18,7 @@ import com.wsy.tizuobackend.exception.ThrowUtil;
 import com.wsy.tizuobackend.mapper.ExamMapper;
 import com.wsy.tizuobackend.model.dto.exam.ExamCreateRequest;
 import com.wsy.tizuobackend.model.dto.exam.GetExamListRequest;
+import com.wsy.tizuobackend.model.dto.exam.ListExamCreateRequest;
 import com.wsy.tizuobackend.model.entity.Cls;
 import com.wsy.tizuobackend.model.entity.Exam;
 import com.wsy.tizuobackend.model.vo.*;
@@ -27,6 +30,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -237,6 +241,72 @@ public class ExamServiceImpl extends ServiceImpl<ExamMapper, Exam>
         QueryWrapper<Exam> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(StrUtil.isNotEmpty(examName), "examName", examName);
         queryWrapper.eq(StrUtil.isNotEmpty(subName), "subName", subName);
+        queryWrapper.orderByDesc("updateTime");
+        //  d. 构建分页，分页查询
+        Page<Exam> examListPage = this.page(new Page<>(currentPage, pageSize), queryWrapper);
+        //  e. 如果record大小为空，直接返回空分页对象
+        if (examListPage.getRecords().size() == 0) {
+            return new Page<>(currentPage, pageSize);
+        }
+        //  f. 取出record，stream流进行班级名查询、VO转换
+        List<ExamListVO> examListVOS = examListPage.getRecords().stream()
+                .map(exam -> {
+                    String className = clsService.getById(exam.getClassid()).getClassName();
+                    return ExamListVO.objToVO(exam, className);
+                }).collect(Collectors.toList());
+        //  g. 构建新分页，设置新的record
+        Page<ExamListVO> examListVOPage = new Page<>(currentPage, pageSize, examListPage.getTotal());
+        examListVOPage.setRecords(examListVOS);
+        //  h. 返回数据
+        return examListVOPage;
+    }
+
+    /**
+     * 创建考试列表
+     * @param listExamCreateRequest
+     * @param request
+     */
+    @Override
+    public void teacherCreateExamByList(ListExamCreateRequest listExamCreateRequest, HttpServletRequest request) {
+        String examName = listExamCreateRequest.getExamName();
+        String examStartTime = listExamCreateRequest.getExamStartTime();
+        String examEndTime = listExamCreateRequest.getExamEndTime();
+        String subName = listExamCreateRequest.getSubName();
+        List<String> classIdList = listExamCreateRequest.getClassIdList();
+        String examDurationTime = listExamCreateRequest.getExamDurationTime();
+        Long paperId = listExamCreateRequest.getPaperId();
+
+        ThrowUtil.throwIf(StrUtil.hasEmpty(examName, examStartTime, examEndTime, subName, examDurationTime), ErrorCode.PARAMS_ERROR);
+        ThrowUtil.throwIf(ObjUtil.isEmpty(paperId), ErrorCode.PARAMS_ERROR);
+        ThrowUtil.throwIf(ArrayUtil.isEmpty(classIdList), ErrorCode.PARAMS_ERROR);
+
+        List<Long> classIdLong = classIdList.stream().map(Long::parseLong).collect(Collectors.toList());
+        for (long id : classIdLong) {
+            ExamCreateRequest examCreateRequest = new ExamCreateRequest();
+            BeanUtils.copyProperties(listExamCreateRequest, examCreateRequest);
+            examCreateRequest.setClassid(id);
+            this.createExam(examCreateRequest, request);
+        }
+    }
+
+    /**
+     * 管理员获取考试列表接口
+     * @param getExamListRequest
+     * @return
+     */
+    @Override
+    public Page<ExamListVO> getExamListAdmin(GetExamListRequest getExamListRequest) {
+        //  a. 获取所有传输字段，判断当前页传递是否为空
+        String examName = getExamListRequest.getExamName();
+        String subName = getExamListRequest.getSubName();
+        long currentPage = getExamListRequest.getCurrentPage();
+        long pageSize = getExamListRequest.getPageSize();
+        ThrowUtil.throwIf(currentPage <= 0, ErrorCode.PARAMS_ERROR, "未填写当前页");
+        //  c. 构建查询条件：不为空的都是查询条件
+        QueryWrapper<Exam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(StrUtil.isNotEmpty(examName), "examName", examName);
+        queryWrapper.eq(StrUtil.isNotEmpty(subName), "subName", subName);
+        queryWrapper.orderByDesc("updateTime");
         //  d. 构建分页，分页查询
         Page<Exam> examListPage = this.page(new Page<>(currentPage, pageSize), queryWrapper);
         //  e. 如果record大小为空，直接返回空分页对象

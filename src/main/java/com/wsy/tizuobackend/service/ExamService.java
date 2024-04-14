@@ -3,6 +3,7 @@ package com.wsy.tizuobackend.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wsy.tizuobackend.model.dto.exam.ExamCreateRequest;
 import com.wsy.tizuobackend.model.dto.exam.GetExamListRequest;
+import com.wsy.tizuobackend.model.dto.exam.ListExamCreateRequest;
 import com.wsy.tizuobackend.model.entity.Exam;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wsy.tizuobackend.model.vo.*;
@@ -67,4 +68,18 @@ public interface ExamService extends IService<Exam> {
      * @return
      */
     Page<ExamListVO> getExamListTeacher(GetExamListRequest getExamListRequest, HttpServletRequest request);
+
+    /**
+     * 创建考试列表
+     * @param listExamCreateRequest
+     * @param request
+     */
+    void teacherCreateExamByList(ListExamCreateRequest listExamCreateRequest, HttpServletRequest request);
+
+    /**
+     * 管理员获取考试列表接口
+     * @param getExamListRequest
+     * @return
+     */
+    Page<ExamListVO> getExamListAdmin(GetExamListRequest getExamListRequest);
 }
